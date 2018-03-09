@@ -1,10 +1,15 @@
 #pragma once
 
 #include <cstdint> // uint64_t
-
-#include <chrono>
-#include <random>
 #include <string>
+
+#ifdef USE_ARC4RANDOM
+    #include <cstdlib> // arc4random_buf
+#else
+    #include <chrono>
+    #include <random>
+#endif
+
 #include <b64.h>
 
 namespace uuid {
@@ -19,6 +24,11 @@ namespace uuid {
 
     public:
         static Id_t random() {
+#ifdef USE_ARC4RANDOM
+            Id_t id;
+            arc4random_buf(id._value, ByteLength);
+            return id;
+#else
             auto seed = std::chrono::high_resolution_clock::now().time_since_epoch().count();
             std::mt19937_64 generator(seed);
             std::uniform_int_distribution<uint64_t> distribution;
@@ -28,6 +38,7 @@ namespace uuid {
                 id._value[i] = distribution(generator);
             }
             return id;
+#endif
         }
 
         static constexpr Id_t fromString(const std::string & idString) {
