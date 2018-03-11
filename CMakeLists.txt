@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 
 project(uuid)
+set(CMAKE_CXX_STANDARD 17)
 
 add_library(uuid "")
 
@@ -25,12 +26,8 @@ if(USE_ARC4RANDOM)
     )
 endif()
 
-target_compile_options(uuid
-PRIVATE
-    -std=c++14
-)
-
 target_link_libraries(uuid
 PUBLIC
+    aes
     b64
 )
