@@ -24,6 +24,8 @@ namespace uuid {
     protected:
         uint8_t bytes[Length];
 
+        friend struct std::hash<uuid::Id_t<_bitLength>>;
+
     public:
         static Id_t random() {
 #ifdef USE_ARC4RANDOM
@@ -155,4 +157,19 @@ namespace uuid {
     };
 
     using Uuid = Id_t<256>;
+}
+
+namespace std {
+    template<int _bitLength>
+    struct hash<uuid::Id_t<_bitLength>> {
+        constexpr size_t operator () (const uuid::Id_t<_bitLength> & id) const noexcept {
+            size_t hash = 0;
+
+            for (int i = 0; i < uuid::Id_t<_bitLength>::Length; ++i) {
+                hash ^= id.bytes[i] << (8 * i % sizeof(size_t));
+            }
+
+            return hash;
+        }
+    };
 }

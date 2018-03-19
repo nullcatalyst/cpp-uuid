@@ -4,6 +4,8 @@
 
 namespace uuid {
     class Guid : public Id_t<128> {
+        friend struct std::hash<uuid::Guid>;
+
     public:
         static Guid random() {
             return Guid{Id_t<128>::random()};
@@ -91,6 +93,21 @@ namespace uuid {
 #undef toHexChar
 
             return std::string(buffer);
+        }
+    };
+}
+
+namespace std {
+    template <>
+    struct hash<uuid::Guid> {
+        constexpr size_t operator () (const uuid::Guid & guid) const noexcept {
+            size_t hash = 0;
+
+            for (int i = 0; i < uuid::Guid::Length; ++i) {
+                hash ^= guid.bytes[i] << (8 * i % sizeof(size_t));
+            }
+
+            return hash;
         }
     };
 }
